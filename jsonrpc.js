@@ -13,7 +13,7 @@ function JsonRpcProvider() {
 
   // provider.$get
   // @ngInject
-  this.$get = function($http, uuid) {
+  this.$get = ['$http', 'uuid', function($http, uuid) {
     /**
      * Makes a JSON-RPC request to `method` with `data`.
      *
@@ -125,7 +125,7 @@ function JsonRpcProvider() {
 
 
     return jsonrpc;
-  };
+  }];
 }
 
 
