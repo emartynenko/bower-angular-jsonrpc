@@ -1,15 +1,20 @@
+/**!
+ * angular-jsonrpc v0.1.2 [build 2013-07-07]
+ * @copyright 2013 Arunjit Singh <opensrc@ajsd.in>. All Rights Reserved.
+ * @license MIT; see LICENCE.
+ * [https://github.com/ajsd/angular-jsonrpc.git]
+ */
 (function(){
 "use strict";
+
 /**
  * Provides and configures the jsonrpc service.
  */
 function JsonRpcProvider() {
   var defaults = this.defaults = {};
 
-
   // defaults
   defaults.rpcPath_ = '/rpc';
-
 
   // provider.$get
   // @ngInject
@@ -54,7 +59,6 @@ function JsonRpcProvider() {
       return $http.post(options.path || defaults.rpcPath_, payload, config);
     }
 
-
     /**
      * Shorthand for making a request.
      *
@@ -73,7 +77,6 @@ function JsonRpcProvider() {
       }
       return jsonrpc({path: path, method: method, data: data}, config);
     };
-
 
     /**
      * Helper to create services.
@@ -100,7 +103,6 @@ function JsonRpcProvider() {
       this.path = path;
     }
 
-
     /**
      * Creates a new service method.
      *
@@ -117,23 +119,23 @@ function JsonRpcProvider() {
       };
     };
 
-
     /** Creates a new Service with the given `name` and optional `path`. */
     jsonrpc.newService = function(name, path) {
       return new Service(name, path);
     };
 
-
     return jsonrpc;
   }];
 }
-
 
 /** Set the base path for all JSON-RPC calls to |path|. */
 JsonRpcProvider.prototype.setBasePath = function(path) {
   this.defaults.rpcPath_ = path;
 };
 
+/**
+ * The jsonrpc module.
+ */
 angular.module('jsonrpc', []).
     service('uuid', UuidService).
     provider('jsonrpc', JsonRpcProvider);
@@ -145,7 +147,6 @@ angular.module('jsonrpc', []).
 function UuidService() {
   this.format = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
 }
-
 
 /**
  * @return {string} A UUID.
