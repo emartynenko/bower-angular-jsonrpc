@@ -1,40 +1,38 @@
 /**!
- * angular-jsonrpc v0.1.2 [build 2013-07-07]
+ * angular-jsonrpc v0.1.3 [build 2013-07-12]
  * @copyright 2013 Arunjit Singh <opensrc@ajsd.in>. All Rights Reserved.
  * @license MIT; see LICENCE.
  * [https://github.com/ajsd/angular-jsonrpc.git]
  */
-(function(){
-"use strict";
+'use strict';
 
 /**
  * Provides and configures the jsonrpc service.
  */
-function JsonRpcProvider() {
+angular.module('jsonrpc', ['uuid']).provider('jsonrpc', function() {
   var defaults = this.defaults = {};
 
   // defaults
-  defaults.rpcPath_ = '/rpc';
+  defaults.basePath = '/rpc';
 
   // provider.$get
-  // @ngInject
-  this.$get = ['$http', 'uuid', function($http, uuid) {
+  this.$get = ['$http', 'uuid4', function($http, uuid4) {
     /**
      * Makes a JSON-RPC request to `method` with `data`.
      *
-     * @param {{path:string=, method: string, data:*)}} options Call options.
+     * @param {{path:string=, method:string, data:*)}} options Call options.
      * @param {angular.$http.Config} config HTTP config.
      * @return {angular.$http.HttpPromise}
      */
     function jsonrpc(options, config) {
-      var id = uuid.generate();
+      var id = uuid4.generate();
       var payload = {
-        'jsonrpc': '2.0',
-        'method': options.method,
-        'id': id
+        jsonrpc: '2.0',
+        method: options.method,
+        id: id
       };
       if (angular.isDefined(options.data)) {
-        payload['params'] = options.data;
+        payload.params = options.data;
       }
 
       // Transformers to extract the response data.
@@ -44,19 +42,20 @@ function JsonRpcProvider() {
         transforms.push(t);
       });
       transforms.push(function(data) {
-        return data['id'] === id ? data['result'] || data['error'] : null;
+        return data.id === id ? data.result || data.error : null;
       });
 
       config = config || {};
-      if (angular.isArray(config['transformResponse'])) {
-        [].push.apply(transforms, config['transformResponse']);
-      } else if (angular.isFunction(config['transformResponse'])) {
-        transforms.push(config['transformResponse']);
+      var configTransforms = config.transformResponse;
+      if (angular.isArray(configTransforms)) {
+        [].push.apply(transforms, configTransforms);
+      } else if (angular.isFunction(configTransforms)) {
+        transforms.push(configTransforms);
       }
-      config['transformResponse'] = transforms;
+      config.transformResponse = transforms;
 
       // TODO(arunjit): Use $q to resolve the result.
-      return $http.post(options.path || defaults.rpcPath_, payload, config);
+      return $http.post(options.path || defaults.basePath, payload, config);
     }
 
     /**
@@ -107,15 +106,15 @@ function JsonRpcProvider() {
      * Creates a new service method.
      *
      * @param {string} name Method name.
-     * @param {angular.$http.Config=} opt_config HTTP config.
+     * @param {angular.$http.Config=} config HTTP config.
      * @return {function(*):angular.$http.HttpPromise} An implementation for the
      *     service method.
      */
-    Service.prototype.createMethod = function(name, opt_config) {
+    Service.prototype.createMethod = function(name, config) {
       var path = this.path;
       var method = this.serviceName + '.' + name;
       return function(data) {
-        return jsonrpc.request(path, method, data, opt_config);
+        return jsonrpc.request(path, method, data, config);
       };
     };
 
@@ -126,37 +125,10 @@ function JsonRpcProvider() {
 
     return jsonrpc;
   }];
-}
 
-/** Set the base path for all JSON-RPC calls to |path|. */
-JsonRpcProvider.prototype.setBasePath = function(path) {
-  this.defaults.rpcPath_ = path;
-};
-
-/**
- * The jsonrpc module.
- */
-angular.module('jsonrpc', []).
-    service('uuid', UuidService).
-    provider('jsonrpc', JsonRpcProvider);
-
-/**
- * An ID generator.
- * Based on http://stackoverflow.com/a/2117523/377392.
- */
-function UuidService() {
-  this.format = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx';
-}
-
-/**
- * @return {string} A UUID.
- */
-UuidService.prototype.generate = function() {
-  /**! http://stackoverflow.com/a/2117523/377392 */
-  return this.format.replace(/[xy]/g, function(c) {
-    var r = Math.random()*16|0, v = c === 'x' ? r : (r&0x3|0x8);
-    return v.toString(16);
-  });
-};
-
-})();
+  /** Set the base path for all JSON-RPC calls to |path|. */
+  this.setBasePath = function(path) {
+    this.defaults.basePath = path;
+    return this;
+  };
+});
