@@ -8,6 +8,6 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/ajsd/bower-angular-jsonrpc.git"
+    "url": "http://github.com/emartynenko/bower-angular-jsonrpc.git"
   }
 }
