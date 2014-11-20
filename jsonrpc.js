@@ -42,7 +42,7 @@ angular.module('jsonrpc', ['uuid']).provider('jsonrpc', function() {
         transforms.push(t);
       });
       transforms.push(function(data) {
-        return data.id === id ? data.result || data.error : null;
+        return data.id === id ? data : null;
       });
 
       config = config || {};
